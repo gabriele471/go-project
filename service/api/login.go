@@ -1,67 +1,41 @@
 package api
 
 import (
-	"fmt"
+	"myproject/service/types"
+
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	var message string
+	//sauthorizationHeader := r.Header.Get("Authorization")
 
 	err := r.ParseForm()
 	if err != nil {
-		fmt.Println(err)
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-
-	user, err := decodeParams(r)
+	username, err := decodeQueryParamsUsername(r)
 	if err != nil {
-		fmt.Println(err)
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-
-	token, err := checkUsername(user.Username)
+	user, err := rt.isUserRegistered("", username)
 	if err != nil {
-		var id string = generateId()
+		user := types.NewUser(generateGenericToken(), username)
 
-		user.Id = id
-
-		userProfile := UserProfile{
-			User: &User{
-				Username: user.Username,
-				Id:       user.Id,
-			},
-			Post:      make(map[string]*Photo),
-			Follower:  make(map[string]*User),
-			Following: make(map[string]*User),
-			Banned:    make(map[string]*User),
-		}
-
-		Profiles[user.Id] = &userProfile
-
-		err := encodeResponse(w, id, http.StatusCreated)
+		//db function call
+		err = rt.db.InsertUser(*user)
 		if err != nil {
-			panic(err)
+			message := "Internal server error"
+			encodeResponse(w, message, http.StatusInternalServerError)
+			return
 		}
+		encodeResponse(w, user, http.StatusCreated)
 		return
 	}
-
-	err = encodeResponse(w, token, http.StatusOK)
-	if err != nil {
-		panic(err)
-	}
-
+	encodeResponse(w, user.Id, http.StatusOK)
 }

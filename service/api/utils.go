@@ -3,12 +3,16 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"math/rand"
+	"myproject/service/types"
+	"sort"
+	"strings"
+
 	"net/http"
-	"time"
 )
 
-var Profiles = make(map[string]*UserProfile)
+var Profiles = make(map[string]types.User)
 
 func checkLenght(username string) bool {
 	if len(username) < 3 || len(username) > 16 {
@@ -16,32 +20,52 @@ func checkLenght(username string) bool {
 	}
 	return false
 }
-func decodeParams(r *http.Request) (*User, error) {
-	user := new(User)
-	username := r.FormValue("username")
-	if checkLenght(username) {
-		return nil, errors.New("invalid params")
+func decodeQueryParamsUsername(r *http.Request) (string, error) {
+
+	parameter := r.FormValue("username")
+	if checkLenght(parameter) {
+		return "", errors.New("invalid params")
 	}
-	user.Username = username
-	return user, nil
+	return parameter, nil
 }
-func checkId(id string) (*User, error) {
-	if Profiles[id] != nil {
-		return Profiles[id].User, nil
+func decodeQueryParamsCommentId(r *http.Request) string {
+	parameter := r.FormValue("commentId")
+	return parameter
+}
+func decodeQueryParamsPostId(r *http.Request) string {
+	parameter := r.FormValue("postId")
+	return parameter
+}
+func (rt *_router) isTokenValid(token string) (*types.User, error) {
+	// Check if the Authorization header starts with "Bearer"
+	if !strings.HasPrefix(token, "Bearer ") {
+		return nil, errors.New("invalid Authorization header format")
 	}
+
+	// Extract the token from the Authorization header
+	token = strings.TrimPrefix(token, "Bearer ")
+	user, err := rt.db.GetUser(token, "")
+	if err != nil {
+		return nil, errors.New("Unauthorized")
+	}
+	return &user, nil
+}
+
+func (rt *_router) isUserRegistered(id string, username string) (*types.User, error) {
+	//retrive info from db
+	//make return type to be a Use, for working use now ill write string
+
+	user, err := rt.db.GetUser(id, username)
+	if err != nil {
+		return nil, err
+	}
+	if username == user.Username {
+		return &user, nil
+	}
+
 	return nil, errors.New("username not found")
 }
-func checkUsername(username string) (*User, error) {
-	for _, profile := range Profiles {
-		if profile.User.Username == username {
-
-			return profile.User, nil
-		}
-	}
-	return nil, errors.New("username not found")
-}
-
-func generateId() string {
+func generateGenericToken() string {
 	var letters = []byte("abcdefghijklmnopqrstuvwxyz")
 	var s string
 	for i := 0; i < 10; i++ {
@@ -52,19 +76,10 @@ func generateId() string {
 
 }
 
-func uploadPhotoParams(id string) *Photo {
-
-	pic := new(Photo) //new returns a pointer to struct Photo
-	pic.PhotoID = generateId()
-	pic.Img = ""
-	pic.OwnerID = id
-	pic.UpDate = time.Now().GoString()
-	pic.Likes = make([]*User, 0)
-	pic.Comments = make([]*Comment, 0)
-	return pic
+func saveResponseBodyToFile(responseBody []byte, filePath string) error {
+	return ioutil.WriteFile(filePath, responseBody, 0644)
 }
-
-func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) error {
+func encodeResponse(w http.ResponseWriter, message interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	data := map[string]interface{}{
@@ -73,42 +88,19 @@ func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) err
 	}
 	jsonData, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
-		return err
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 	jsonData = append(jsonData, '\n') //just for sake of readability
-	w.Write(jsonData)                 //Grants better costumization over encoding, the input is []byte
-	return nil
+	_, _ = w.Write(jsonData)          //Grants better costumization over encoding, the input is []byte
 
 }
 
-func (P *User) changeUsername(username string) {
-	P.Username = username
-}
-func (Profile *UserProfile) checkFollowing(target *User) error {
-	if Profile.Following[target.Id] != nil || Profile.User.Id == target.Id {
-		return errors.New("already following")
-	}
-	return nil
-}
+func sortPosts(feed types.Feed) []types.Post {
+	sort.Slice(feed.Feed, func(i, j int) bool {
+		return feed.Feed[i].Time > feed.Feed[j].Time
+	})
 
-func (Profile *UserProfile) checkBanList(target *User) error {
-	if Profile.Banned[target.Id] != nil || Profile.User.Id == target.Id {
-		return errors.New("already in banned list")
-	}
-	return nil
-}
-
-func (Profile *UserProfile) checkPost(picId string) error {
-	if Profile.Post[picId] == nil {
-		return errors.New("Post not found")
-	}
-	return nil
-}
-func (Profile *UserProfile) checkLikes(picId string, user *User) error {
-	for _, el := range Profile.Post[picId].Likes {
-		if el.Id == user.Id {
-			return errors.New("post already liked")
-		}
-	}
-	return nil
+	// Print the sorted posts
+	return feed.Feed
 }

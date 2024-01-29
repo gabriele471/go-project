@@ -6,8 +6,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) unLikePhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authorizationHeader := r.Header.Get("Authorization")
+
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
 		message := "Session token not valid"
@@ -20,26 +21,17 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	username, err := decodeQueryParamsUsername(r)
-	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
-		return
-	}
-	targetUser, err := rt.isUserRegistered("", username)
-	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
-		return
-	}
+	//this should be passed by the fe (being the name of the pic)
+	//so no error handling
+	postId := decodeQueryParamsPostId(r)
 
-	err = rt.db.InsertFollower(targetUser.Id, user.Id)
+	err = rt.db.RemoveLike(postId, user.Id)
 	if err != nil {
-		message := "Internal server error"
+		message := "internal server error"
 		encodeResponse(w, message, http.StatusInternalServerError)
 		return
 	}
-
 	message := "Success"
 	encodeResponse(w, message, http.StatusOK)
+
 }

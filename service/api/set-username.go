@@ -7,43 +7,34 @@ import (
 )
 
 func (rt *_router) setNewUsername(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	authorizationHeader := r.Header.Get("Authorization")
 	var message string
-	user := new(User)
-	id := ps.ByName("userID")
 
-	user, err := checkId(id)
+	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err = encodeResponse(w, message, http.StatusUnauthorized)
-		if err != nil {
-			panic(err)
-		}
+		message = "Session token not valid"
+		encodeResponse(w, message, http.StatusUnauthorized)
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
-		err = encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	newName, err := decodeParams(r)
+	user.Username, err = decodeQueryParamsUsername(r)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
-		err = encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-
-	user.changeUsername(newName.Username)
-
-	err = encodeResponse(w, user.Username, http.StatusOK)
+	//allows user to have the same name, id will alwsays be different
+	err = rt.db.UpdateUsername(user.Id, user.Username)
 	if err != nil {
-		panic(err)
+		message := "Internal server error"
+		encodeResponse(w, message, http.StatusInternalServerError)
+		return
 	}
+	encodeResponse(w, user.Username, http.StatusOK)
 }
