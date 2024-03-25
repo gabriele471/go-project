@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,22 +12,19 @@ func (rt *_router) removePost(w http.ResponseWriter, r *http.Request, ps httprou
 	authorizationHeader := r.Header.Get("Authorization")
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message := "Session token not valid"
-		encodeResponse(w, message, http.StatusUnauthorized)
+		encodeResponse(w, Msg401, http.StatusUnauthorized)
 		return
 	}
 	err = r.ParseForm()
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
-	//this should be passed by the fe (being the name of the pic)
+	// this should be passed by the fe (being the name of the pic)
 	postId := decodeQueryParamsPostId(r)
 	err = rt.db.RemovePost(user.Id, postId)
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
 
@@ -37,9 +33,8 @@ func (rt *_router) removePost(w http.ResponseWriter, r *http.Request, ps httprou
 	filePathToDelete := filepath.Join(imagesDir, fileToDelete)
 	err = os.Remove(filePathToDelete)
 	if err != nil {
-		fmt.Println("Error:", err)
+		rt.baseLogger.Error(err)
 	}
-	message := "Success"
-	encodeResponse(w, message, http.StatusOK)
+	encodeResponse(w, Msg200, http.StatusOK)
 
 }

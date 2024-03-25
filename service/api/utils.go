@@ -12,6 +12,11 @@ import (
 	"net/http"
 )
 
+const Msg401 = "Session token not valid"
+const Msg400 = "The server cannot or will not process the request due to an apparent client error"
+const Msg500 = "Internal server error"
+const Msg200 = "Success"
+
 var Profiles = make(map[string]types.User)
 
 func checkLenght(username string) bool {
@@ -42,7 +47,6 @@ func (rt *_router) isTokenValid(token string) (*types.User, error) {
 		return nil, errors.New("invalid Authorization header format")
 	}
 
-	// Extract the token from the Authorization header
 	token = strings.TrimPrefix(token, "Bearer ")
 	user, err := rt.db.GetUser(token, "")
 	if err != nil {
@@ -52,8 +56,6 @@ func (rt *_router) isTokenValid(token string) (*types.User, error) {
 }
 
 func (rt *_router) isUserRegistered(id string, username string) (*types.User, error) {
-	//retrive info from db
-	//make return type to be a Use, for working use now ill write string
 
 	user, err := rt.db.GetUser(id, username)
 	if err != nil {
@@ -91,8 +93,8 @@ func encodeResponse(w http.ResponseWriter, message interface{}, statusCode int) 
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	jsonData = append(jsonData, '\n') //just for sake of readability
-	_, _ = w.Write(jsonData)          //Grants better costumization over encoding, the input is []byte
+	jsonData = append(jsonData, '\n') // just for sake of readability
+	_, _ = w.Write(jsonData)          // Grants better costumization over encoding, the input is []byte
 
 }
 

@@ -25,19 +25,19 @@ export default {}
 						<li class="nav-item">
 							<RouterLink to="/" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
-								Home
+								Login
 							</RouterLink>
 						</li>
 						<li class="nav-item">
-							<RouterLink to="/link1" class="nav-link">
+							<RouterLink to="/users/profile" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#layout"/></svg>
-								Menu item 1
+								Profile
 							</RouterLink>
 						</li>
 						<li class="nav-item">
 							<RouterLink to="/link2" class="nav-link">
 								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
+								Feed
 							</RouterLink>
 						</li>
 					</ul>

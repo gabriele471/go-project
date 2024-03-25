@@ -10,33 +10,28 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	authorizationHeader := r.Header.Get("Authorization")
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message := "Session token not valid"
-		encodeResponse(w, message, http.StatusUnauthorized)
+		encodeResponse(w, Msg401, http.StatusUnauthorized)
 		return
 	}
 	err = r.ParseForm()
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
 	username, err := decodeQueryParamsUsername(r)
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
 	targetUser, err := rt.isUserRegistered("", username)
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
 	err = rt.db.RemoveFollow(user.Id, targetUser.Id)
 	if err != nil {
-		encodeResponse(w, err, http.StatusInternalServerError)
+		encodeResponse(w, Msg500, http.StatusInternalServerError)
 		return
 	}
-	message := "Success"
-	encodeResponse(w, message, http.StatusOK)
+	encodeResponse(w, Msg200, http.StatusOK)
 }

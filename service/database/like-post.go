@@ -4,7 +4,6 @@ import (
 	"myproject/service/types"
 )
 
-// SetName is an example that shows you how to execute insert/update
 func (db *appdbimpl) InsertLike(likeid string, postId string, user types.User) error {
 
 	query := `

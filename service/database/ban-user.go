@@ -1,6 +1,5 @@
 package database
 
-// SetName is an example that shows you how to execute insert/update
 func (db *appdbimpl) BanUser(bannedUserId string, userId string) error {
 	err := db.RemoveFollow(bannedUserId, userId)
 	if err != nil {

@@ -11,26 +11,21 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message := "Session token not valid"
-		encodeResponse(w, message, http.StatusUnauthorized)
+		encodeResponse(w, Msg401, http.StatusUnauthorized)
 		return
 	}
 	err = r.ParseForm()
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
-	//this should be passed by the fe (being the name of the pic)
-	//so no error handling
+
 	postId := decodeQueryParamsPostId(r)
 
 	err = rt.db.InsertLike(generateGenericToken(), postId, *user)
 	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
-	message := "Success"
-	encodeResponse(w, message, http.StatusOK)
+	encodeResponse(w, Msg200, http.StatusOK)
 }

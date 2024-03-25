@@ -1,6 +1,5 @@
 package database
 
-// SetName is an example that shows you how to execute insert/update
 func (db *appdbimpl) RemoveLike(postId string, likerId string) error {
 
 	query := `

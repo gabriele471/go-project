@@ -5,12 +5,14 @@ import (
 	"myproject/service/types"
 )
 
-// GetName is an example that shows you how to query data
 func (db *appdbimpl) GetProfile(profile types.User, viewerId string) (*types.User, error) {
 	var err error
 	modality, err := cleanBanFeed(db, profile.Id, viewerId)
+	if err != nil {
+		return nil, err
+	}
 	if modality == "0" {
-		return nil, errors.New("Attempt to visualize a profile either banned or banned by")
+		return nil, errors.New("attempt to visualize a profile either banned or banned by")
 	}
 
 	profile.Follower, err = getFollower(db, profile)
@@ -27,7 +29,7 @@ func (db *appdbimpl) GetProfile(profile types.User, viewerId string) (*types.Use
 		return nil, err
 	}
 	profile.Npost = len(profile.Post)
-	//random return
+
 	return &profile, nil
 }
 func getFollowing(db *appdbimpl, profile types.User) ([]types.Follower, error) {
@@ -43,7 +45,7 @@ func getFollowing(db *appdbimpl, profile types.User) ([]types.Follower, error) {
 		WHERE
 			followers.follower_id = ?`
 	rows, err := db.c.Query(query, profile.Id)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -71,9 +73,8 @@ func getFollower(db *appdbimpl, profile types.User) ([]types.Follower, error) {
 		WHERE
 			followers.user_id = ?`
 
-	// Execute the query
 	rows, err := db.c.Query(query, profile.Id)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -91,7 +92,7 @@ func GetPosts(db *appdbimpl, profile types.User, viewerId string) ([]types.Post,
 	var posts []types.Post
 
 	rows, err := db.c.Query("SELECT post_id, owner_username, photo, created_at FROM posts WHERE owner_id = ? ORDER BY created_at DESC", profile.Id)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -133,7 +134,7 @@ func getComments(db *appdbimpl, postId string, viewerId string) ([]types.Comment
 		JOIN bans ON users.id = bans.user_id 
 		WHERE bans.banned_id = ?;`
 	rows, err := db.c.Query(query, postId, viewerId, viewerId)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -167,7 +168,7 @@ func getLikes(db *appdbimpl, postId string, viewerId string) ([]string, error) {
 	where bans.banned_id = ?
 	`
 	rows, err := db.c.Query(query, postId, viewerId, viewerId)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()

@@ -4,13 +4,11 @@ import (
 	"myproject/service/types"
 )
 
-// GetName is an example that shows you how to query data
 func (db *appdbimpl) GetFeed(user types.User) (*types.Feed, error) {
 
 	var feed types.Feed
 
 	followingList, err := FetchUsers(db, user.Id)
-	//error is above on the following list
 	if err != nil {
 		return nil, err
 	}
@@ -32,10 +30,6 @@ func (db *appdbimpl) GetFeed(user types.User) (*types.Feed, error) {
 }
 func FetchUsers(db *appdbimpl, profileId string) ([]types.User, error) {
 	var users []types.User
-	//from your account get YOUR following and grab (id, username) with a query
-	//then as for the grab profile take all the Posts from the list obtained above
-	//order the list using the time.time functions
-	//ez
 	query := `
 	SELECT users.id, users.username
 	FROM followers
@@ -43,7 +37,7 @@ func FetchUsers(db *appdbimpl, profileId string) ([]types.User, error) {
 	WHERE followers.follower_id  = ?;`
 
 	rows, err := db.c.Query(query, profileId)
-	if err != nil {
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 	defer rows.Close()
