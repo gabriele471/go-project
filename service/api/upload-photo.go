@@ -1,7 +1,7 @@
 package api
 
 import (
-	"io/ioutil"
+	"io"
 	"myproject/service/types"
 	"net/http"
 	"os"
@@ -13,32 +13,36 @@ import (
 func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	authorizationHeader := r.Header.Get("Authorization")
+
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
 		encodeResponse(w, Msg401, http.StatusUnauthorized)
 		return
 	}
-	// image is sent within the header
-	// later saved in a dir, named as its Post Id
-	// Determine the file extension based on the Content-Type header
+
+	file, fileHeader, err := r.FormFile("image")
+	if err != nil {
+		encodeResponse(w, Msg400, http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	if fileHeader.Header.Get("Content-Type") != "image/jpeg" {
+		encodeResponse(w, Msg400, http.StatusBadRequest)
+		return
+	}
 	PhotoId := generateGenericToken()
 	// downloadDirectory := "/service/images" // relative path from service/api/filethatsavesit
 	downloadDirectory := "./service/images"
 
 	path := filepath.Join(downloadDirectory, PhotoId+".jpg")
-	_, err = os.Create(path)
+	newFile, err := os.Create(path)
 	if err != nil {
 		encodeResponse(w, Msg500, http.StatusInternalServerError)
 		return
 	}
-
-	responseBody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-
-		encodeResponse(w, Msg400, http.StatusBadRequest)
-		return
-	}
-	err = saveResponseBodyToFile(responseBody, path)
+	defer newFile.Close()
+	_, err = io.Copy(newFile, file)
 	if err != nil {
 		encodeResponse(w, Msg500, http.StatusInternalServerError)
 		return

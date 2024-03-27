@@ -30,7 +30,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 			encodeResponse(w, Msg500, http.StatusInternalServerError)
 			return
 		}
-		encodeResponse(w, user, http.StatusCreated)
+		encodeResponse(w, user.Id, http.StatusCreated)
 		return
 	}
 	encodeResponse(w, user.Id, http.StatusOK)

@@ -5,32 +5,37 @@ export default {
 			errormsg: null,
 			loading: false,
 			username: null,
-            requestSent: false
+			profile : null,
+			notfound:null
 		}
 	},
 	methods: {
 		async searchUser() {
 			this.loading = true;
 			this.errormsg = null;
-            this.requestSent = false
+            
             const queryParams = {
                 username: this.username
-            }
-            const token = localStorage.getItem('token')
+            };
+            const token = localStorage.getItem('token');
             
             const headers = {
                 'Authorization': 'Bearer ' + token
-            }
+            };
             
 			try {
 				let response = await this.$axios.get("/users/profile",  {params:queryParams, headers: headers});
-				this.profile_data = response.data.message;
+				this.profile = response.data.message;
+				
                 
 			} catch (e) {
-				this.errormsg = e.toString();
+				this.errormsg = "User not found"
+				this.profile = '';
 			}
-            this.requestSent = true
+		
+			this.notfound = false;
 			this.loading = false;
+			
 		},
 	},
 }
@@ -64,13 +69,15 @@ export default {
 		<form @submit.prevent="searchUser"> 
 			<input type="text" id="username" v-model="username" required> <br>
 		</form>
-		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 		<button @click="searchUser">Search User Profile</button>
+		
+		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+		<div v-if = "profile" > <br>
+			<p> {{ profile?.Username }} </p>
 
-        <div v-if="this.requestSent"> <br>
-            <p>Username: {{profile_data.Username }}</p>
-            <p>Number of posts: {{profile_data.Npost }}</p>
-        </div>
+		</div>
+		
+        
 	</div>
 </template>
 

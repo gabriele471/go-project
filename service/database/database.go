@@ -40,7 +40,6 @@ import (
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	GetName() (string, error)
-	SetName(name string) error
 	GetUser(id string, username string) (types.User, error)
 	InsertUser(user types.User) error
 	InsertFollower(userId string, followerId string) error

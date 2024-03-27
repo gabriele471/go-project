@@ -78,8 +78,8 @@ func generateGenericToken() string {
 
 }
 
-func saveResponseBodyToFile(responseBody []byte, filePath string) error {
-	return ioutil.WriteFile(filePath, responseBody, 0644)
+func saveResponseBodyToFile(picData []byte, filePath string) error {
+	return ioutil.WriteFile(filePath, picData, 0644)
 }
 func encodeResponse(w http.ResponseWriter, message interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
