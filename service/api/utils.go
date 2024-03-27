@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"math/rand"
 	"myproject/service/types"
 	"sort"
@@ -78,9 +77,6 @@ func generateGenericToken() string {
 
 }
 
-func saveResponseBodyToFile(picData []byte, filePath string) error {
-	return ioutil.WriteFile(filePath, picData, 0644)
-}
 func encodeResponse(w http.ResponseWriter, message interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
