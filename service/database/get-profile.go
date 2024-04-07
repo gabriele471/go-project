@@ -102,7 +102,7 @@ func GetPosts(db *appdbimpl, profile types.User, viewerId string) ([]types.Post,
 			return nil, err
 		}
 		post.OwnerId = profile.Id
-		//grab likes and commments from relative table for each post
+		// grab likes and commments from relative table for each post
 		post.Likes, err = getLikes(db, post.PostId, viewerId)
 		if err != nil {
 			return nil, err

@@ -133,7 +133,7 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
     
-    /post/like:
+    /post/likes:
       parameters:
         - name: postId
           in: query
@@ -174,7 +174,7 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
 
-    /post/commment:      
+    /post/commments:      
       parameters:
       - name: postId
         in: query

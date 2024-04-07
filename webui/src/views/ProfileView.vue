@@ -9,7 +9,6 @@ export default {
 			CommentBoxShowing:null,
 			token:null,
 			loading: false,
-			username: null,
 			isLoggedIn:false,
 			profile:null,
 
@@ -43,7 +42,7 @@ export default {
                 'Authorization': 'Bearer ' + token
             };
 			try {
-				let response = await this.$axios.post("/post/comment", commentMessage, {params: queryParams, headers:headers});
+				let response = await this.$axios.post("/post/comments", commentMessage, {params: queryParams, headers:headers});
 				
 
 			} catch (e) {
@@ -78,7 +77,7 @@ export default {
                 'Authorization': 'Bearer ' + token
             };
 			try {
-				let response = await this.$axios.delete("/post/comment", {params: queryParams, headers:headers});
+				let response = await this.$axios.delete("/post/comments", {params: queryParams, headers:headers});
 				
 
 			} catch (e) {
@@ -124,7 +123,7 @@ export default {
 			};
 			
 			try {
-				let response = await this.$axios.delete("/post/like", config);
+				let response = await this.$axios.delete("/post/likes", config);
 				
 			} catch (e) {
 				this.errormsg = e.toString()
@@ -154,7 +153,7 @@ export default {
                 'Authorization': 'Bearer ' + token
             };
 			try {
-				let response = await this.$axios.post("/post/like", null, {params: queryParams, headers:headers});
+				let response = await this.$axios.post("/post/likes", null, {params: queryParams, headers:headers});
 				
 			} catch (e) {
 				this.errormsg = e.toString()
