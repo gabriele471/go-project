@@ -25,7 +25,7 @@ func (rt *_router) setNewUsername(w http.ResponseWriter, r *http.Request, ps htt
 		encodeResponse(w, Msg400, http.StatusBadRequest)
 		return
 	}
-	// allows user to have the same name, id will alwsays be different
+	// missing username check to avoid same names
 	err = rt.db.UpdateUsername(user.Id, user.Username)
 	if err != nil {
 		encodeResponse(w, Msg500, http.StatusInternalServerError)

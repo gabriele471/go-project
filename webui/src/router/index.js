@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import FeedView from '../views/FeedView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileView from '../views/ProfileView.vue'
 
@@ -8,8 +8,7 @@ const router = createRouter({
 	routes: [
 		{path: '/session', component: LoginView}, 
 		{path: '/users/profile', component: ProfileView},
-		{path: '/link2', component: HomeView},
-		{path: '/some/:id/link', component: HomeView},
+		{path: '/users/profile/feed', component: FeedView},
 	]
 })
 

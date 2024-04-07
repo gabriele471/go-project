@@ -33,7 +33,7 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	PhotoId := generateGenericToken()
 	// downloadDirectory := "/service/images" // relative path from service/api/filethatsavesit
-	downloadDirectory := "./service/images"
+	downloadDirectory := "./webui/public/images"
 
 	path := filepath.Join(downloadDirectory, PhotoId+".jpg")
 	newFile, err := os.Create(path)

@@ -28,9 +28,11 @@ func (rt *_router) removePost(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	imagesDir := "./service/images"
+	imagesDir := "./webui/public/images"
 	fileToDelete := postId + ".jpg"
+
 	filePathToDelete := filepath.Join(imagesDir, fileToDelete)
+
 	err = os.Remove(filePathToDelete)
 	if err != nil {
 		rt.baseLogger.Error(err)

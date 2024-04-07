@@ -37,6 +37,7 @@ func decodeQueryParamsCommentId(r *http.Request) string {
 	return parameter
 }
 func decodeQueryParamsPostId(r *http.Request) string {
+
 	parameter := r.FormValue("postId")
 	return parameter
 }
